@@ -178,7 +178,7 @@ public class JogoDaVida extends JFrame implements ActionListener
                     }
                 }
             });
-            f_autoFill.setVisible(false);
+            f_autoFill.setVisible(true);
         } 
         else if (ae.getSource().equals(menuReiniciar)) 
         {

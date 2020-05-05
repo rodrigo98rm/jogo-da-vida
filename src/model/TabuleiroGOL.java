@@ -21,7 +21,7 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
     private static final long serialVersionUID = 1L;
     private Dimension dimensaoTabuleiro = null;
     private ArrayList<Cell> ponto = new ArrayList<Cell>(0);
-    private static int tamanhoCelula = 100;
+    private static int tamanhoCelula = 10;
     private int iteracaoPorSegundo;
 
     public TabuleiroGOL() {
@@ -43,7 +43,7 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
 
     public void addPoint(int x, int y, boolean infected) {
 //        if (!ponto.contains(new Cell(x, y, infected))) {
-        ponto.add(new Cell(x, y, infected));
+        ponto.add(new Cell(x, y, infected, 0));
 //        }
         repaint();
     }
@@ -138,10 +138,8 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
         System.out.println(count);
 
         if (count == 1) {
-            System.out.println("here 1");
             addPoint(e, false);
         } else if (count == 2) {
-            System.out.println("here 2");
             addPoint(e, true);
         }
     }
@@ -184,7 +182,7 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
 
                 if (tabuleiro[x][y] != null) {
 
-                    Cell atual = new Cell(x, y, false);
+                    Cell atual = tabuleiro[x][y];
                     boolean morre = false;
                     boolean infectada = false;
 
@@ -209,18 +207,27 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
                      * morre por super população.
                      *
                      */
-                    if (vizinhosVivosInfectados > 2 && tabuleiro[x][y].isInfected()) {
+//                    if (atual.isInfected() && Math.random() < 0.007) {
+                    if (atual.isInfected()) {
                         morre = true;
                     }
 
                     // Regra de infecção
 //                    Se possui pelo menos um vizinho infectado a célula fica infectada
-                    if (vizinhosVivosInfectados > 0) {
-                        infectada = true;
+//                    OU
+                    // Se já estava infectada, continua infectada
+                    if ((vizinhosVivosInfectados > 0) || atual.isInfected()) {
+                        //if ((vizinhosVivosInfectados > 0 && Math.random() > 0.8) || atual.isInfected()) {
+                        if (atual.getDaysInfected() > 8) {
+                            infectada = false;
+                            morre = false;
+                        } else {
+                            infectada = true;
+                        }
                     }
 
                     if (!morre) {
-                        celulasVivas.add(new Cell(x, y, infectada));
+                        celulasVivas.add(new Cell(x, y, infectada, atual.getDaysInfected() + 1));
                     }
 
                 } else {
@@ -230,8 +237,9 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
                      * vizinhos vivos, então esta célula se torna viva na
                      * próxima iteração.
                      */
+//                    if (vizinhosVivosSaudaveis == 2 && Math.random() > 0.7) {
                     if (vizinhosVivosSaudaveis == 2) {
-                        celulasVivas.add(new Cell(x, y, false));
+                        celulasVivas.add(new Cell(x, y, false, 0));
                     }
                 }// Fim do else
             }// Fim do for j
