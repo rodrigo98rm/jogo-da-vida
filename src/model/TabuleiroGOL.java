@@ -42,9 +42,7 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
     }
 
     public void addPoint(int x, int y, boolean infected) {
-//        if (!ponto.contains(new Cell(x, y, infected))) {
         ponto.add(new Cell(x, y, infected, 0));
-//        }
         repaint();
     }
 
@@ -90,9 +88,9 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
         try {
             for (Cell novoPonto : ponto) {
                 if (novoPonto.isInfected() == true) {
-                    g.setColor(Color.red);
+                    g.setColor(Color.red); // Celulas infectadas aparecem com a cor vermelha
                 } else {
-                    g.setColor(Color.blue);
+                    g.setColor(Color.blue); // Celulas saudaveis aparecem com a cor azul
                 }
 
                 g.fillRect(tamanhoCelula + (tamanhoCelula * novoPonto.x), tamanhoCelula + (tamanhoCelula * novoPonto.y), tamanhoCelula, tamanhoCelula);
@@ -135,11 +133,9 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
 
         int count = e.getClickCount();
 
-        System.out.println(count);
-
-        if (count == 1) {
+        if (count == 1) { // Um click: adicionar uma celula saudavel
             addPoint(e, false);
-        } else if (count == 2) {
+        } else if (count == 2) { // Dois clicks: adicionar uma celula infectada
             addPoint(e, true);
         }
     }
@@ -163,67 +159,48 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
         int vizinhosVivosInfectados = 0;
         ArrayList<Cell> celulasVivas = new ArrayList<Cell>(0);
 
+        // matriz trocada de boolean para Cell para facilitar o acesso as
+        // propriedades de cada celula
         Cell[][] tabuleiro = new Cell[dimensaoTabuleiro.width][dimensaoTabuleiro.height];
         for (Cell atual : ponto) {
             tabuleiro[atual.x][atual.y] = atual;
-            //System.out.println("x:"+atual.x+"       y:"+atual.y);
         }
 
         for (int x = 0; x < dimensaoTabuleiro.width; x++) {
             for (int y = 0; y < dimensaoTabuleiro.height; y++) {
-                //System.out.println("---------------------");
-                //System.out.println("Ponto("+x+","+y+"): ");
-                // Vizinhos vivos saudáveis
 
-                // Vizinhos vivos infectados
                 vizinhosVivosSaudaveis = contarVizinhosVivosSaudaveis(x, y, tabuleiro);
                 vizinhosVivosInfectados = contarVizinhosVivosInfectados(x, y, tabuleiro);
-                //System.out.println("Vizinhos: " + vizinhosVivos);
+                
+                Cell atual = tabuleiro[x][y];
 
-                if (tabuleiro[x][y] != null) {
+                if (atual != null) {
 
-                    Cell atual = tabuleiro[x][y];
                     boolean morre = false;
                     boolean infectada = false;
 
-                    /**
-                     * Regra de sobrevivência. Se uma célula está viva em um
-                     * determinado instante, e se a quantidade de seus vizinhos
-                     * vivos é igual a dois (02) ou três (03), a celula
-                     * sobrevive na próxima iteração.
-                     */
-//                    if ((vizinhosVivos == 2) || (vizinhosVivos == 3)) {
-//                        celulasVivas.add(new Cell(x, y, false));
-//                    }
-                    /**
-                     * Regra de morte 1. Para uma célula viva, se em um instante
-                     * a quantidade de vizinhos vivos for menor que dois (02),
-                     * na próxima iteração esta célula morre por solidão
-                     * (sub-população).
-                     *
-                     * Regra de morte 2. Para uma célula viva, se em um
-                     * determinado instante a quantidade de vizinhos vivos for
-                     * maior do que três (03), na próxima iteração a célula
-                     * morre por super população.
-                     *
-                     */
+                    /*
+                        Regra de Morte
+                        - Uma celula infectada morre na transicao entre iteracoes
+                    */
 //                    if (atual.isInfected() && Math.random() < 0.007) {
                     if (atual.isInfected()) {
                         morre = true;
                     }
 
-                    // Regra de infecção
-//                    Se possui pelo menos um vizinho infectado a célula fica infectada
-//                    OU
-                    // Se já estava infectada, continua infectada
-                    if ((vizinhosVivosInfectados > 0) || atual.isInfected()) {
-                        //if ((vizinhosVivosInfectados > 0 && Math.random() > 0.8) || atual.isInfected()) {
-                        if (atual.getDaysInfected() > 8) {
-                            infectada = false;
-                            morre = false;
-                        } else {
+                    /*
+                        Regra de Infeccao
+                        - Se possui pelo menos um vizinho infectado a celula fica infectada
+                        - Se a celula esta infectada ela continua infectada (utilizado apenas na variante com probabilidades)
+                    */
+                    if ((vizinhosVivosInfectados > 0)) {
+//                        if ((vizinhosVivosInfectados > 0 && Math.random() > 0.8) || atual.isInfected()) {
+//                        if (atual.getDaysInfected() > 8) {
+//                            infectada = false;
+//                            morre = false;
+//                        } else {
                             infectada = true;
-                        }
+//                        }
                     }
 
                     if (!morre) {
@@ -231,11 +208,9 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
                     }
 
                 } else {
-                    /**
-                     * Regra de nascimento. Se uma célula está morta em um
-                     * determinado instante, mas tem exatamente três (03)
-                     * vizinhos vivos, então esta célula se torna viva na
-                     * próxima iteração.
+                    /*
+                        Regra de Nascimento
+                        - Uma celula nasce caso tenha exatamente dois vizinhos vivos saudaveis
                      */
 //                    if (vizinhosVivosSaudaveis == 2 && Math.random() > 0.7) {
                     if (vizinhosVivosSaudaveis == 2) {
@@ -251,14 +226,13 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
 
         try {
             Thread.sleep(1000 / iteracaoPorSegundo);
-            //Thread.sleep(4000);
             run();
         } catch (InterruptedException ex) {
         }
     }//Fim do método run()
 
     /**
-     * Contar o número de células vivas, de acordo com a posição i,j
+     * Contar o número de células vivas saudaveis, de acordo com a posição i,j
      */
     private int contarVizinhosVivosSaudaveis(int x, int y, Cell[][] tabuleiro) {
         /**
@@ -301,7 +275,8 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
             direita = x + 1;
         }
 
-        //System.out.println("acima: "+acima+"   abaixo: "+abaixo+"   esquerda: "+esquerda+"    direita: "+direita);
+        // Vizinho saudavel existe se sua celula nao estiver vazia e nao estiver infectada
+        
         if (tabuleiro[esquerda][acima] != null && tabuleiro[esquerda][acima].isInfected() == false) {
             vizinhanca++;
         }
@@ -371,7 +346,8 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
             direita = x + 1;
         }
 
-        //System.out.println("acima: "+acima+"   abaixo: "+abaixo+"   esquerda: "+esquerda+"    direita: "+direita);
+        // Vizinho infectado existe se sua celula nao estiver vazia e estiver infectada
+        
         if (tabuleiro[esquerda][acima] != null && tabuleiro[esquerda][acima].isInfected()) {
             vizinhanca++;
         }
