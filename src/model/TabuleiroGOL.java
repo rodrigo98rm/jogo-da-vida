@@ -171,7 +171,7 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
 
                 vizinhosVivosSaudaveis = contarVizinhosVivosSaudaveis(x, y, tabuleiro);
                 vizinhosVivosInfectados = contarVizinhosVivosInfectados(x, y, tabuleiro);
-                
+
                 Cell atual = tabuleiro[x][y];
 
                 if (atual != null) {
@@ -182,9 +182,10 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
                     /*
                         Regra de Morte
                         - Uma celula infectada morre na transicao entre iteracoes
-                    */
+                        - Uma celula morre de superpopulacao quando tem pelo menos 7 vizinhos vivos (infectados ou nao)
+                     */
 //                    if (atual.isInfected() && Math.random() < 0.007) {
-                    if (atual.isInfected()) {
+                    if (atual.isInfected() || (vizinhosVivosInfectados + vizinhosVivosSaudaveis) > 6) {
                         morre = true;
                     }
 
@@ -192,14 +193,14 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
                         Regra de Infeccao
                         - Se possui pelo menos um vizinho infectado a celula fica infectada
                         - Se a celula esta infectada ela continua infectada (utilizado apenas na variante com probabilidades)
-                    */
+                     */
                     if ((vizinhosVivosInfectados > 0)) {
 //                        if ((vizinhosVivosInfectados > 0 && Math.random() > 0.8) || atual.isInfected()) {
 //                        if (atual.getDaysInfected() > 8) {
 //                            infectada = false;
 //                            morre = false;
 //                        } else {
-                            infectada = true;
+                        infectada = true;
 //                        }
                     }
 
@@ -276,7 +277,6 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
         }
 
         // Vizinho saudavel existe se sua celula nao estiver vazia e nao estiver infectada
-        
         if (tabuleiro[esquerda][acima] != null && tabuleiro[esquerda][acima].isInfected() == false) {
             vizinhanca++;
         }
@@ -347,7 +347,6 @@ public class TabuleiroGOL extends JPanel implements ComponentListener, MouseList
         }
 
         // Vizinho infectado existe se sua celula nao estiver vazia e estiver infectada
-        
         if (tabuleiro[esquerda][acima] != null && tabuleiro[esquerda][acima].isInfected()) {
             vizinhanca++;
         }
